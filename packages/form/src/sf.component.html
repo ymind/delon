@@ -1,7 +1,8 @@
 <ng-template #con>
   <ng-content></ng-content>
 </ng-template>
-<form nz-form [nzLayout]="layout" (submit)="onSubmit($event)" [attr.autocomplete]="autocomplete">
+<nz-skeleton *ngIf="libLoading"></nz-skeleton>
+<form *ngIf="!libLoading && _btn" nz-form [nzLayout]="layout" (submit)="onSubmit($event)" [attr.autocomplete]="autocomplete">
   <sf-item *ngIf="rootProperty" [formProperty]="rootProperty"></sf-item>
   <ng-container *ngIf="button !== 'none'; else con">
     <nz-form-item *ngIf="_btn.render" [ngClass]="_btn.render!.class!" class="sf-btns" [fixed-label]="_btn.render!.spanLabelFixed!">

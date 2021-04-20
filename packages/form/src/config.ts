@@ -3,6 +3,7 @@ import { SFButton } from './interface';
 import { SFUISchemaItem } from './schema/ui';
 
 export const SF_DEFAULT_CONFIG: AlainSFConfig = {
+  ajvLib: `https://cdnjs.cloudflare.com/ajax/libs/ajv/8.1.0/ajv2019.bundle.js`,
   formatMap: {
     'date-time': {
       widget: 'date',

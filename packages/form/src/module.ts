@@ -53,6 +53,7 @@ const ZORROS = [
   NzTransferModule,
   NzTreeSelectModule,
   NzUploadModule,
+  NzSkeletonModule,
 ];
 
 import { SFFixedDirective } from './sf-fixed.directive';
@@ -66,6 +67,7 @@ const COMPONENTS = [SFComponent, SFItemComponent, SFItemWrapComponent, SFTemplat
 
 // #region widgets
 
+import { NzSkeletonModule } from 'ng-zorro-antd/skeleton';
 import { WidgetRegistry } from './widget.factory';
 import { ArrayWidget } from './widgets/array/array.widget';
 import { AutoCompleteWidget } from './widgets/autocomplete/autocomplete.widget';

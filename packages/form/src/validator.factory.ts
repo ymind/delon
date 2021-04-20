@@ -38,6 +38,9 @@ export class AjvSchemaValidatorFactory extends SchemaValidatorFactory {
           ...customOptions.formats,
         },
       });
+      if (typeof this.options.ajvInit === 'function') {
+        this.options.ajvInit(this.ajv);
+      }
     });
   }
 

@@ -32,6 +32,7 @@ import { FormProperty, PropertyGroup } from './model/form.property';
 import { FormPropertyFactory } from './model/form.property.factory';
 import { SFSchema } from './schema/index';
 import { SFOptionalHelp, SFUISchema, SFUISchemaItem, SFUISchemaItemRun } from './schema/ui';
+import { SFService } from './sf.service';
 import { TerminatorService } from './terminator.service';
 import { di, resolveIfSchema, retrieveSchema } from './utils';
 import { SchemaValidatorFactory } from './validator.factory';
@@ -80,7 +81,7 @@ export class SFComponent implements OnInit, OnChanges, OnDestroy {
   static ngAcceptInputType_noColon: BooleanInput;
   static ngAcceptInputType_cleanValue: BooleanInput;
 
-  private unsubscribe$ = new Subject<void>();
+  private destroy$ = new Subject<void>();
   private _renders = new Map<string, TemplateRef<void>>();
   private _item: {};
   private _valid = true;
@@ -88,6 +89,7 @@ export class SFComponent implements OnInit, OnChanges, OnDestroy {
   readonly options: AlainSFConfig;
 
   _inited = false;
+  libLoading = true;
   locale: LocaleData = {};
   rootProperty: FormProperty | null = null;
   _formData: {};
@@ -228,6 +230,7 @@ export class SFComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   constructor(
+    private srv: SFService,
     private formPropertyFactory: FormPropertyFactory,
     private terminator: TerminatorService,
     private dom: DomSanitizer,
@@ -242,7 +245,7 @@ export class SFComponent implements OnInit, OnChanges, OnDestroy {
     this.liveValidate = this.options.liveValidate as boolean;
     this.firstVisual = this.options.firstVisual as boolean;
     this.autocomplete = this.options.autocomplete as 'on' | 'off';
-    this.localeSrv.change.pipe(takeUntil(this.unsubscribe$)).subscribe(() => {
+    this.localeSrv.change.pipe(takeUntil(this.destroy$)).subscribe(() => {
       this.locale = this.localeSrv.getData('sf');
       if (this._inited) {
         this.validator({ emitError: false, onlyRoot: false });
@@ -258,10 +261,23 @@ export class SFComponent implements OnInit, OnChanges, OnDestroy {
       merge(...(refSchemas as Array<Observable<any>>))
         .pipe(
           filter(() => this._inited),
-          takeUntil(this.unsubscribe$),
+          takeUntil(this.destroy$),
         )
         .subscribe(() => this.refreshSchema());
     }
+    this.srv.notify.pipe(takeUntil(this.destroy$)).subscribe(() => {
+      if (this.libLoading) {
+        this.libLoading = false;
+        this.cdr.detectChanges();
+      }
+      this.srv.cover({
+        options: this.options,
+        schema: this.schema,
+        formData: this.formData,
+        layout: this.layout,
+      });
+      console.log('refresh schema');
+    });
   }
 
   protected fanyi(key: string): string {
@@ -567,8 +583,11 @@ export class SFComponent implements OnInit, OnChanges, OnDestroy {
     if (newSchema) this.schema = newSchema;
     if (newUI) this.ui = newUI;
 
-    if (!this.schema || typeof this.schema.properties === 'undefined') throw new Error(`Invalid Schema`);
     if (this.schema.ui && typeof this.schema.ui === 'string') throw new Error(`Don't support string with root ui property`);
+
+    this.srv.refreshSchema(this.options.ajvLib!);
+
+    ////////////////////
 
     this.schema.type = 'object';
 
@@ -632,8 +651,8 @@ export class SFComponent implements OnInit, OnChanges, OnDestroy {
   ngOnDestroy(): void {
     this.cleanRootSub();
     this.terminator.destroy();
-    const { unsubscribe$ } = this;
-    unsubscribe$.next();
-    unsubscribe$.complete();
+    const { destroy$ } = this;
+    destroy$.next();
+    destroy$.complete();
   }
 }

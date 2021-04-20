@@ -1,3 +1,6 @@
+import type Ajv from 'ajv';
+import type { Options as AjvOptions } from 'ajv';
+
 export interface AlainSFConfigFormatMap {
   'date-time': { widget?: string; showTime?: boolean; format?: string };
   date: { widget?: string; format?: string };
@@ -22,9 +25,17 @@ export interface AlainSFConfig {
    */
   ingoreKeywords?: string[];
   /**
+   * ajv 类库，默认：`https://cdnjs.cloudflare.com/ajax/libs/ajv/8.1.0/ajv2019.min.js`
+   */
+  ajvLib?: string;
+  /**
    * [ajv](https://github.com/ajv-validator/ajv/blob/master/docs/api.md#options) 参数
    */
-  ajv?: any;
+  ajv?: AjvOptions;
+  /**
+   * Ajv 初始化，用于加载 Ajv 其他插件，只会执行一次
+   */
+  ajvInit?: (ajv: Ajv) => void;
   /**
    * 是否实时校验，默认：`true`
    * - `true` 每一次都校验

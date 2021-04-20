@@ -1,38 +1,40 @@
 import { Component } from '@angular/core';
-import { dateTimePickerUtil } from '@delon/util/date-time';
+import { SFSchema, SFStringWidgetSchema, SFTextWidgetSchema } from '@delon/form';
+import { NzMessageService } from 'ng-zorro-antd/message';
 
 @Component({
   selector: 'app-demo',
   template: `
-    <p>value: {{ value | _date }}</p>
-    <nz-date-picker
-      [(ngModel)]="value"
-      nzFormat="yyyy-MM-dd HH:mm:ss"
-      [nzDisabledDate]="disabledDate"
-      [nzDisabledTime]="disabledDateTime"
-      nzShowTime
-    ></nz-date-picker>
-    <br />
-    <nz-date-picker nzMode="month" [nzDisabledDate]="disabledDate"></nz-date-picker>
-    <br />
-    <nz-date-picker nzMode="year" [nzDisabledDate]="disabledDate"></nz-date-picker>
-    <br />
-    <p>values: {{ values }}</p>
-    <nz-range-picker
-      [(ngModel)]="values"
-      [nzDisabledDate]="disabledDate"
-      [nzDisabledTime]="disabledDateTime"
-      nzShowTime
-      nzShowNow
-      nzFormat="yyyy-MM-dd HH:mm:ss"
-    ></nz-range-picker>
+    <h1>Schema 1</h1>
+    <sf [schema]="schema" (formSubmit)="submit($event)"></sf>
+    <h1>Schema 2</h1>
+    <sf [schema]="schema2" (formSubmit)="submit($event)"></sf>
   `,
 })
 export class DemoComponent {
-  value: Date;
-  values: Date[];
-  disabledDate = dateTimePickerUtil.disabledBeforeDate();
-  disabledDateTime = dateTimePickerUtil.disabledBeforeTime({ offsetSeconds: 60 * 5 });
-  // disabledDate = dateTimePickerUtil.disabledAfterDate();
-  // disabledDateTime = dateTimePickerUtil.disabledAfterTime();
+  schema: SFSchema = {
+    properties: {
+      id1: { type: 'number', ui: { widget: 'text' } as SFTextWidgetSchema },
+      id2: { type: 'number', ui: { widget: 'text', defaultText: 'default text' } as SFTextWidgetSchema },
+    },
+  };
+  schema2: SFSchema = {
+    properties: {
+      name: {
+        type: 'string',
+        title: 'Name',
+        ui: {
+          addOnAfter: 'RMB',
+          placeholder: 'RMB结算',
+        } as SFStringWidgetSchema,
+      },
+    },
+    required: ['name'],
+  };
+
+  constructor(private msg: NzMessageService) {}
+
+  submit(value: {}): void {
+    this.msg.info(JSON.stringify(value));
+  }
 }
